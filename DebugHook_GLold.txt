@@ -1,0 +1,74 @@
+
+-- ubah menjadi true untuk on, false untuk off
+-- sc ini untuk Debug + save di file biar kagak capek ngetik
+
+pkt=false
+savepkt=false
+
+packetraw=false
+saveraw=false
+
+gamepacket=false
+savegame=false
+
+var=false
+savevar=false
+
+
+
+
+
+
+
+LogToConsole("start script\n")
+
+function vs(t,i)
+local e="";i=i or"";for k,v in pairs(t)do if type(v)=="table" then e=e..i.."["..k.."]={\n";e=e..vs(v,i.."  ");e=e..i.."}\n";elseif v~=0 then e=e..i.."["..k.."]="..tostring(v).."\n";end end return e end
+
+function spread(t,i)
+local e="";i=i or"";for k,v in pairs(t)do if type(v)=="table" then e=e..i..k.."={\n";e=e..spread(v,i.."  ");e=e..i.."}\n";else e=e..i..k.."="..tostring(v)..",\n";end end return e end
+
+function write(name, s)
+  local file = io.open("/storage/emulated/0/Android/data/launcher.powerkuy/ScriptLua/"..name, "a+")
+  file:write(s.."\n\n")
+  file:close()
+  return "Done"
+end
+
+
+if pkt == true then
+  AddHook(function(t,s)
+    LogToConsole("Type : " .. t .."\n" .. s)
+      if savepkt == true then
+        write("PacketHook.lua", "SendPacket("..t..", [["..s.."]])\n\n")
+      end
+  end,"OnSendPacket")
+end
+
+if packetraw == true then
+AddHook(function(k)
+  LogToConsole(spread({pkt = k}))
+  if saveraw == true then
+    write("PacketRawHook.lua", spread({pkt = k}).."\n\n")
+  end
+end, "OnSendPacketRaw")
+end
+
+if gamepacket == true then
+AddHook(function(k)
+  LogToConsole(spread(k))
+ --  log(spread({pkt = k}))
+  if savegame == true then
+    write("GamePktHook.lua", "SendPacketRaw(true, {"..spread(k).."})\n\n")
+  end
+end, "OnSendPacketRaw")
+end
+
+if var == true then
+AddHook(function(k)
+  LogToConsole(vs(k))
+  if savevar == true then
+    write("VarlistHook.lua", vs(k).."\n\n")
+  end
+end, "OnVariant")
+end
